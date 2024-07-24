@@ -78,24 +78,30 @@ static_assert(sizeof(ThreadContext) == 448, "sizeof(ThreadContext) != 448");
 template <class K, class V, class D>
 class FasterKv {
  public:
-  typedef FasterKv<K, V, D> faster_t;
+  using faster_t = FasterKv<K, V, D> ;
 
   /// Keys and values stored in this key-value store.
-  typedef K key_t;
-  typedef V value_t;
+  using key_t = K;
+  using value_t = V;
+    
+  using disk_t = D;
+  using  file_t = typename D::file_t;
+  using log_file_t = typename D::log_file_t;
 
-  typedef D disk_t;
-  typedef typename D::file_t file_t;
-  typedef typename D::log_file_t log_file_t;
-
-  typedef PersistentMemoryMalloc<disk_t> hlog_t;
+  using hlog_t =  PersistentMemoryMalloc<disk_t>;
 
   /// Contexts that have been deep-copied, for async continuations, and must be accessed via
   /// virtual function calls.
+  /*
   typedef AsyncPendingReadContext<key_t> async_pending_read_context_t;
   typedef AsyncPendingUpsertContext<key_t> async_pending_upsert_context_t;
   typedef AsyncPendingRmwContext<key_t> async_pending_rmw_context_t;
   typedef AsyncPendingDeleteContext<key_t> async_pending_delete_context_t;
+*/
+using async_pending_read_context_t = AsyncPendingReadContext<key_t>;
+using async_pending_upsert_context_t = AsyncPendingUpsertContext<key_t>;
+using async_pending_rmw_context_t = AsyncPendingRmwContext<key_t>;
+using async_pending_delete_context_t = AsyncPendingDeleteContext<key_t>;
 
   FasterKv(uint64_t table_size, uint64_t log_size, const std::string& filename,
            double log_mutable_fraction = 0.9, bool pre_allocate_log = false,

@@ -10,9 +10,10 @@
 #define _WINSOCKAPI_
 #include <Windows.h>
 #else
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
+#include <iostream>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 #endif
 
@@ -21,13 +22,19 @@ namespace benchmark {
 
 /// Basic wrapper around synchronous file read.
 class File {
- public:
-  File(const std::string& filename) {
+public:
+  File(const std::string &filename) {
 #ifdef _WIN32
-    file_handle_ = ::CreateFileA(filename.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr,
-                                 OPEN_EXISTING, FILE_FLAG_NO_BUFFERING, nullptr);
+    file_handle_ =
+        ::CreateFileA(filename.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr,
+                      OPEN_EXISTING, FILE_FLAG_NO_BUFFERING, nullptr);
 #else
     fd_ = ::open(filename.c_str(), O_RDONLY | O_DIRECT, S_IRUSR);
+    if (fd_ < 0) {
+      std::cout << "[" << __PRETTY_FUNCTION__ << "]: Error: file " << filename
+                << " does not exist\n";
+      exit(128);
+    }
 #endif
   }
 
@@ -39,17 +46,18 @@ class File {
 #endif
   }
 
-  size_t Read(void* buf, size_t count, uint64_t offset) {
+  size_t Read(void *buf, size_t count, uint64_t offset) {
 #ifdef _WIN32
-    DWORD bytes_read { 0 };
-    ::ReadFile(file_handle_, buf, static_cast<DWORD>(count), &bytes_read, nullptr);
+    DWORD bytes_read{0};
+    ::ReadFile(file_handle_, buf, static_cast<DWORD>(count), &bytes_read,
+               nullptr);
     return bytes_read;
 #else
     return ::pread(fd_, buf, count, offset);
 #endif
   }
 
- private:
+private:
 #ifdef _WIN32
   HANDLE file_handle_;
 #else
@@ -57,5 +65,5 @@ class File {
 #endif
 };
 
-}
-} // namespace FASTER::benchmark
+} // namespace benchmark
+} // namespace FASTER

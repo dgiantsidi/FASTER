@@ -19,42 +19,32 @@ using Value = SimpleAtomicValue<uint64_t>;
 
 /// Upsert context required to insert data for unit testing.
 class UpsertContext : public IAsyncContext {
- public:
+public:
   typedef Key key_t;
   typedef Value value_t;
 
-  UpsertContext(uint64_t key)
-    : key_{ key }
-  {}
+  UpsertContext(uint64_t key) : key_{key} {}
 
   /// Copy (and deep-copy) constructor.
-  UpsertContext(const UpsertContext& other)
-    : key_{ other.key_ }
-  {}
+  UpsertContext(const UpsertContext &other) : key_{other.key_} {}
 
   /// The implicit and explicit interfaces require a key() accessor.
-  inline const Key& key() const {
-    return key_;
-  }
-  inline static constexpr uint32_t value_size() {
-    return sizeof(value_t);
-  }
+  inline const Key &key() const { return key_; }
+  inline static constexpr uint32_t value_size() { return sizeof(value_t); }
   /// Non-atomic and atomic Put() methods.
-  inline void Put(Value& value) {
-    value.value = 23;
-  }
-  inline bool PutAtomic(Value& value) {
+  inline void Put(Value &value) { value.value = 23; }
+  inline bool PutAtomic(Value &value) {
     value.atomic_value.store(42);
     return true;
   }
 
- protected:
+protected:
   /// The explicit interface requires a DeepCopy_Internal() implementation.
-  Status DeepCopy_Internal(IAsyncContext*& context_copy) {
+  Status DeepCopy_Internal(IAsyncContext *&context_copy) {
     return IAsyncContext::DeepCopy_Internal(*this, context_copy);
   }
 
- private:
+private:
   Key key_;
 };
 
@@ -63,16 +53,16 @@ class UpsertContext : public IAsyncContext {
 TEST(ScanIter, InMem) {
   typedef FasterKv<Key, Value, FASTER::device::NullDisk> faster_t;
 
-  faster_t store { 128, 1073741824, "" };
+  faster_t store{128, 1073741824, ""};
 
   store.StartSession();
 
   int numRecords = 256;
   for (size_t idx = 0; idx < numRecords; ++idx) {
-    auto callback = [](IAsyncContext* ctxt, Status result) {
+    auto callback = [](IAsyncContext *ctxt, Status result) {
       ASSERT_TRUE(false);
     };
-    UpsertContext context{ static_cast<uint64_t>(idx) };
+    UpsertContext context{static_cast<uint64_t>(idx)};
     Status result = store.Upsert(context, callback, 1);
     ASSERT_EQ(Status::Ok, result);
   }
@@ -84,7 +74,8 @@ TEST(ScanIter, InMem) {
   int num = 0;
   while (true) {
     auto r = iter.GetNext();
-    if (r == nullptr) break;
+    if (r == nullptr)
+      break;
     ASSERT_EQ(num, r->key().key);
     num++;
   }
@@ -94,7 +85,7 @@ TEST(ScanIter, InMem) {
   store.StopSession();
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

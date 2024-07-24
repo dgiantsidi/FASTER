@@ -9,14 +9,11 @@
 namespace FASTER {
 namespace test {
 
-template<class T, class HashFn = std::hash<T>>
-class FixedSizeKey {
- public:
-  FixedSizeKey(T value)
-    : key{ value }
-  {}
+template <class T, class HashFn = std::hash<T>> class FixedSizeKey {
+public:
+  FixedSizeKey(T value) : key{value} {}
 
-  FixedSizeKey(const FixedSizeKey&) = default;
+  FixedSizeKey(const FixedSizeKey &) = default;
 
   inline static constexpr uint32_t size() {
     return static_cast<uint32_t>(sizeof(FixedSizeKey));
@@ -24,33 +21,26 @@ class FixedSizeKey {
 
   inline core::KeyHash GetHash() const {
     HashFn hash_fn;
-    return core::KeyHash{ hash_fn(key) };
+    return core::KeyHash{hash_fn(key)};
   }
 
-  inline bool operator==(const FixedSizeKey& other) const {
+  inline bool operator==(const FixedSizeKey &other) const {
     return key == other.key;
   }
-  inline bool operator!=(const FixedSizeKey& other) const {
+  inline bool operator!=(const FixedSizeKey &other) const {
     return key != other.key;
   }
 
   T key;
 };
 
-template<class T>
-class SimpleAtomicValue {
- public:
-  SimpleAtomicValue()
-    : value{}
-  {}
+template <class T> class SimpleAtomicValue {
+public:
+  SimpleAtomicValue() : value{} {}
 
-  SimpleAtomicValue(T value_)
-    : value{ value_ }
-  {}
+  SimpleAtomicValue(T value_) : value{value_} {}
 
-  SimpleAtomicValue(const SimpleAtomicValue& other)
-    : value{ other.value }
-  {}
+  SimpleAtomicValue(const SimpleAtomicValue &other) : value{other.value} {}
 
   inline static constexpr uint32_t size() {
     return static_cast<uint32_t>(sizeof(SimpleAtomicValue));
@@ -62,27 +52,25 @@ class SimpleAtomicValue {
   };
 };
 
-class NonCopyable
-{
-  public:
-  NonCopyable(const NonCopyable&) = delete;
-  NonCopyable& operator=(const NonCopyable&) = delete;
+class NonCopyable {
+public:
+  NonCopyable(const NonCopyable &) = delete;
+  NonCopyable &operator=(const NonCopyable &) = delete;
 
-  protected:
+protected:
   NonCopyable() = default;
   ~NonCopyable() = default;
 };
 
-class NonMovable
-{
-  public:
-  NonMovable(NonMovable&&) = delete;
-  NonMovable& operator=(NonMovable&&) = delete;
+class NonMovable {
+public:
+  NonMovable(NonMovable &&) = delete;
+  NonMovable &operator=(NonMovable &&) = delete;
 
-  protected:
+protected:
   NonMovable() = default;
   ~NonMovable() = default;
 };
 
-}
-} // namespace FASTER::test
+} // namespace test
+} // namespace FASTER
