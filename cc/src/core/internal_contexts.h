@@ -18,6 +18,7 @@
 #include "state_transitions.h"
 #include "thread.h"
 #include "key_hash.h"
+#include <iostream>
 
 namespace FASTER {
 namespace core {
@@ -47,7 +48,8 @@ enum class OperationStatus : uint8_t {
 template <class K>
 class PendingContext : public IAsyncContext {
  public:
-  typedef K key_t;
+  
+  using key_t = K;
 
  protected:
   PendingContext(OperationType type_, IAsyncContext& caller_context_,
@@ -217,7 +219,7 @@ class PendingReadContext : public AsyncPendingReadContext<typename RC::key_t> {
 };
 
 /// FASTER's internal Upsert() context.
-
+#include <iostream>
 /// An internal Upsert() context that has gone async and lost its type information.
 template <class K>
 class AsyncPendingUpsertContext : public PendingContext<K> {
@@ -226,10 +228,12 @@ class AsyncPendingUpsertContext : public PendingContext<K> {
  protected:
   AsyncPendingUpsertContext(IAsyncContext& caller_context_, AsyncCallback caller_callback_)
     : PendingContext<key_t>(OperationType::Upsert, caller_context_, caller_callback_) {
+      std::cout << __PRETTY_FUNCTION__ << "\n";
   }
   /// The deep copy constructor.
   AsyncPendingUpsertContext(AsyncPendingUpsertContext& other, IAsyncContext* caller_context)
     : PendingContext<key_t>(other, caller_context) {
+      std::cout << __PRETTY_FUNCTION__ << "\n";
   }
  public:
   virtual void Put(void* rec) = 0;
@@ -241,11 +245,16 @@ class AsyncPendingUpsertContext : public PendingContext<K> {
 template <class UC>
 class PendingUpsertContext : public AsyncPendingUpsertContext<typename UC::key_t> {
  public:
-  typedef UC upsert_context_t;
-  typedef typename upsert_context_t::key_t key_t;
-  typedef typename upsert_context_t::value_t value_t;
+  // typedef UC upsert_context_t;
+  using upsert_context_t = UC;
+  // typedef typename upsert_context_t::key_t key_t;
+  using key_t = typename upsert_context_t::key_t;
+  // typedef typename upsert_context_t::value_t value_t;
+  using value_t = typename upsert_context_t::value_t
   using key_or_shallow_key_t = std::remove_const_t<std::remove_reference_t<std::result_of_t<decltype(&UC::key)(UC)>>>;
-  typedef Record<key_t, value_t> record_t;
+
+  // typedef Record<key_t, value_t> record_t;
+  using record_t = Record<key_t, value_t>;
   constexpr static const bool kIsShallowKey = !std::is_same<key_or_shallow_key_t, key_t>::value;
 
   PendingUpsertContext(upsert_context_t& caller_context_, AsyncCallback caller_callback_)
@@ -285,7 +294,9 @@ class PendingUpsertContext : public AsyncPendingUpsertContext<typename UC::key_t
   inline bool is_key_equal(const key_t& other) const final {
     return upsert_context().key() == other;
   }
+
   inline void Put(void* rec) final {
+    std::cout << __PRETTY_FUNCTION__ << "\n";
     record_t* record = reinterpret_cast<record_t*>(rec);
     upsert_context().Put(record->value());
   }

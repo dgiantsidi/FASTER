@@ -595,7 +595,9 @@ template <class UC>
 inline Status FasterKv<K, V, D>::Upsert(UC& context, AsyncCallback callback,
                                         uint64_t monotonic_serial_num) {
   typedef UC upsert_context_t;
-  typedef PendingUpsertContext<UC> pending_upsert_context_t;
+  using upsert_context_t = UC;
+  using pending_upsert_context_t =  PendingUpsertContext<UC>;
+  //typedef PendingUpsertContext<UC> pending_upsert_context_t;
   static_assert(std::is_base_of<value_t, typename upsert_context_t::value_t>::value,
                 "value_t is not a base class of upsert_context_t::value_t");
   static_assert(alignof(value_t) == alignof(typename upsert_context_t::value_t),
@@ -844,7 +846,8 @@ inline OperationStatus FasterKv<K, V, D>::InternalRead(C& pending_context) const
 template <class K, class V, class D>
 template <class C>
 inline OperationStatus FasterKv<K, V, D>::InternalUpsert(C& pending_context) {
-  typedef C pending_upsert_context_t;
+  // typedef C pending_upsert_context_t;
+  using pending_upsert_context_t = C;
 
   if(thread_ctx().phase != Phase::REST) {
     HeavyEnter();

@@ -137,8 +137,8 @@ private:
 /// Class passed to store_t::Upsert().
 class UpsertContext : public IAsyncContext {
 public:
-  typedef Key key_t;
-  typedef Value value_t;
+  using key_t = Key;
+  using value_t = Value;
 
   UpsertContext(uint64_t key, uint64_t input) : key_{key}, input_{input} {}
 
@@ -171,8 +171,8 @@ private:
 /// Class passed to store_t::RMW().
 class RmwContext : public IAsyncContext {
 public:
-  typedef Key key_t;
-  typedef Value value_t;
+  using key_t = Key;
+  using value_t = Value;
 
   RmwContext(uint64_t key, uint64_t incr) : key_{key}, incr_{incr} {}
 
